@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>(function(){try{var t=localStorage.getItem('vezora_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/favicon-64.png">
+<title>Your Cart — Vezora</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="index.html" class="logo">
+      <div class="logo-main">
+        <img src="assets/logo-icon.png" alt="Vezora" class="logo-img" />
+        VEZORA
+      </div>
+      <div class="logo-tag">Explore <span style="color:#fff;">Plus</span></div>
+    </a>
+    <div class="search-bar">
+      <input type="text" id="global-search" placeholder="Search for products, categories and more" />
+      <button type="button" class="search-icon search-icon-mic" onclick="startVoiceSearch()" title="Search by voice" id="voice-search-btn">&#127908;</button>
+      <button type="button" class="search-icon search-icon-camera" onclick="startVisualSearch()" title="Search by image">&#128247;</button>
+      <input type="file" id="visual-search-input" accept="image/*" capture="environment" style="display:none;" onchange="handleVisualSearchFile(this)" />
+      <button type="button" class="search-icon" onclick="runGlobalSearch()">&#128269;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Shop</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="admin/admin.html">Admin</a></li>
+    </ul>
+    <div class="nav-right">
+      <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
+      <button type="button" class="theme-toggle" id="theme-toggle-btn" title="Switch to dark mode" onclick="toggleTheme()">&#127769;</button>
+      <div id="auth-slot"></div>
+      <a href="wishlist.html" class="cart-link">
+        &#9825; <span class="cart-link-text">Wishlist</span> <span class="cart-count" data-wishlist-count>0</span>
+      </a>
+      <a href="cart.html" class="cart-link">
+        &#128722; <span class="cart-link-text">Cart</span> <span class="cart-count" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container cart-page">
+  <div class="section-title" style="margin-top:0;">
+    <h2>Your cart</h2>
+  </div>
+  <div id="cart-root"></div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/app.js"></script>
+<script src="js/cart-page.js"></script>
+</body>
+</html>

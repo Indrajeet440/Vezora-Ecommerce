@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>(function(){try{var t=localStorage.getItem('vezora_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/favicon-64.png">
+<title>Vezora — Mobiles, Fashion, Electronics & More</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="index.html" class="logo">
+      <div class="logo-main">
+        <img src="assets/logo-icon.png" alt="Vezora" class="logo-img" />
+        VEZORA
+      </div>
+      <div class="logo-tag">All in One Place</div>
+    </a>
+    <div class="search-bar">
+      <input type="text" id="global-search" placeholder="Search for products, categories and more" />
+      <button type="button" class="search-icon search-icon-mic" onclick="startVoiceSearch()" title="Search by voice" id="voice-search-btn">&#127908;</button>
+      <button type="button" class="search-icon search-icon-camera" onclick="startVisualSearch()" title="Search by image">&#128247;</button>
+      <input type="file" id="visual-search-input" accept="image/*" capture="environment" style="display:none;" onchange="handleVisualSearchFile(this)" />
+      <button type="button" class="search-icon" onclick="runGlobalSearch()">&#128269;</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Shop</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="admin/admin.html">Admin</a></li>
+    </ul>
+    <div class="nav-right">
+      <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">&#9776;</button>
+      <button type="button" class="theme-toggle" id="theme-toggle-btn" title="Switch to dark mode" onclick="toggleTheme()">&#127769;</button>
+      <div id="auth-slot"></div>
+      <a href="wishlist.html" class="cart-link">
+        &#9825; <span class="cart-link-text">Wishlist</span> <span class="cart-count" data-wishlist-count>0</span>
+      </a>
+      <a href="cart.html" class="cart-link">
+        &#128722; <span class="cart-link-text">Cart</span> <span class="cart-count" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="category-strip category-strip-top">
+    <div class="container" id="category-strip-inner"></div>
+  </div>
+
+  <section class="hero-carousel-wrap container">
+    <div class="hero-carousel" id="hero-carousel">
+      <div class="hero-track" id="hero-track"></div>
+      <button type="button" class="hero-arrow hero-arrow-prev" onclick="moveBanner(-1)" aria-label="Previous banner">&#10094;</button>
+      <button type="button" class="hero-arrow hero-arrow-next" onclick="moveBanner(1)" aria-label="Next banner">&#10095;</button>
+      <div class="hero-dots" id="hero-dots"></div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="trust-badges" id="trust-badges"></div>
+  </div>
+
+  <div class="container">
+    <div id="catalog"></div>
+    <div class="section-title">
+      <h2>All products</h2>
+      <span class="eyebrow" id="result-count"></span>
+    </div>
+
+    <div class="catalog-layout">
+      <aside class="filter-panel">
+        <h3>Filters</h3>
+        <div class="filter-group">
+          <h4>Category</h4>
+          <div class="chip-list" id="filters"></div>
+        </div>
+        <div class="filter-group">
+          <h4>Sort by</h4>
+          <div class="chip-list" id="sort-options">
+            <button class="chip active" data-sort="default">Popularity</button>
+            <button class="chip" data-sort="priceLow">Price: Low to High</button>
+            <button class="chip" data-sort="priceHigh">Price: High to Low</button>
+            <button class="chip" data-sort="rating">Customer Rating</button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="product-grid" id="product-grid">
+        <!-- Products injected by JS -->
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+
+<script src="js/app.js"></script>
+<script src="js/products.js"></script>
+</body>
+</html>

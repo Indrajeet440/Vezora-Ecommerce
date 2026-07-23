@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<title>Invoice — Vezora</title>
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .invoice-page { max-width: 820px; margin: 40px auto 80px; padding: 0 20px; }
+  .invoice-toolbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 18px; }
+  .invoice-sheet {
+    background: #fff; color: #1a2e22; border-radius: 10px; padding: 48px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12); border: 1px solid #e6e9ef;
+  }
+  .invoice-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 34px; padding-bottom: 24px; border-bottom: 2px solid #0f6e57; }
+  .invoice-head img { height: 50px; width: auto; margin-bottom: 8px; }
+  .invoice-head .invoice-meta { text-align: right; font-size: 13px; color: #555; }
+  .invoice-head .invoice-meta strong { color: #1a2e22; font-size: 15px; }
+  .invoice-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin: 0 0 4px; color: #0f6e57; }
+  .invoice-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
+  .invoice-cols h4 { margin: 0 0 8px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+  .invoice-cols p { margin: 0; font-size: 14px; line-height: 1.6; color: #222; }
+  table.invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  table.invoice-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px; color: #888; padding: 10px 8px; border-bottom: 2px solid #e6e9ef; }
+  table.invoice-table td { padding: 12px 8px; font-size: 14px; border-bottom: 1px solid #eef0ec; }
+  table.invoice-table td.num, table.invoice-table th.num { text-align: right; }
+  .invoice-totals { margin-left: auto; width: 280px; }
+  .invoice-totals .row { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; color: #555; }
+  .invoice-totals .row.grand { font-size: 17px; font-weight: 700; color: #0f6e57; border-top: 2px solid #0f6e57; margin-top: 6px; padding-top: 10px; }
+  .invoice-footer-note { margin-top: 40px; padding-top: 20px; border-top: 1px dashed #ddd; font-size: 12.5px; color: #888; text-align: center; }
+  @media print {
+    header.site-header, footer.site-footer, .invoice-toolbar { display: none !important; }
+    body { background: #fff; }
+    .invoice-sheet { box-shadow: none; border: none; padding: 0; }
+    .invoice-page { margin: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a href="index.html" class="logo">
+      <div class="logo-main">
+        <img src="assets/logo-icon.png" alt="Vezora" class="logo-img" />
+        VEZORA
+      </div>
+      <div class="logo-tag">All in One Place</div>
+    </a>
+    <div class="nav-right" style="margin-left:auto;">
+      <a href="orders.html" class="btn btn-outline">&#8592; Back to Orders</a>
+    </div>
+  </div>
+</header>
+
+<main class="invoice-page">
+  <div class="invoice-toolbar">
+    <button class="btn btn-primary" onclick="window.print()">&#128424; Print / Save as PDF</button>
+  </div>
+  <div class="invoice-sheet" id="invoice-root">
+    <p style="text-align:center; color:#888;">Loading invoice...</p>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+<script src="js/invoice.js"></script>
+</body>
+</html>

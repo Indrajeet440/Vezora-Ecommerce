@@ -1,0 +1,12 @@
+{
+  "name": "drift-ecommerce-backend",
+  "version": "1.0.0",
+  "description": "Single-vendor e-commerce backend (Node.js core http module, JSON file DB)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
