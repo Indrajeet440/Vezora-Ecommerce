@@ -1,12 +1,15 @@
 {
-  "name": "drift-ecommerce-backend",
+  "name": "vezora-ecommerce-backend",
   "version": "1.0.0",
-  "description": "Single-vendor e-commerce backend (Node.js core http module, JSON file DB)",
+  "description": "Single-vendor e-commerce backend (Node.js core http module; JSON file DB locally, MongoDB in production)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "engines": {
     "node": ">=16"
+  },
+  "dependencies": {
+    "mongoose": "^8.0.0"
   }
 }
