@@ -106,7 +106,7 @@ const server = http.createServer(async (req, res) => {
         return sendJSON(res, 400, { error: "Enter a valid email address" });
       }
 
-      const users = db.getUsers();
+      const users = await db.getUsers();
       if (users.find((u) => u.email === email)) {
         return sendJSON(res, 409, { error: "An account with this email already exists" });
       }
@@ -125,7 +125,7 @@ const server = http.createServer(async (req, res) => {
         createdAt: new Date().toISOString(),
       };
       users.push(newUser);
-      db.saveUsers(users);
+      await db.saveUsers(users);
 
       return sendJSON(res, 201, { id: newUser.id, name: newUser.name, email: newUser.email, token: newUser.token });
     } catch (e) {
@@ -139,7 +139,7 @@ const server = http.createServer(async (req, res) => {
       const email = (body.email || "").trim().toLowerCase();
       const password = body.password || "";
 
-      const users = db.getUsers();
+      const users = await db.getUsers();
       const user = users.find((u) => u.email === email);
       if (!user) {
         return sendJSON(res, 401, { error: "Incorrect email or password" });
@@ -156,7 +156,7 @@ const server = http.createServer(async (req, res) => {
 
       // Rotate the session token on each login
       user.token = crypto.randomBytes(24).toString("hex");
-      db.saveUsers(users);
+      await db.saveUsers(users);
 
       return sendJSON(res, 200, { id: user.id, name: user.name, email: user.email, token: user.token });
     } catch (e) {
@@ -166,13 +166,13 @@ const server = http.createServer(async (req, res) => {
 
   // ---------- API: SETTINGS (banners, trust badges, footer) ----------
   if (url === "/api/settings" && method === "GET") {
-    return sendJSON(res, 200, db.getSettings());
+    return sendJSON(res, 200, await db.getSettings());
   }
 
   if (url === "/api/settings" && method === "PUT") {
     try {
       const body = await readBody(req);
-      db.saveSettings(body);
+      await db.saveSettings(body);
       return sendJSON(res, 200, body);
     } catch (e) {
       return sendJSON(res, 400, { error: "Invalid request" });
@@ -181,12 +181,12 @@ const server = http.createServer(async (req, res) => {
 
   // ---------- API: PRODUCTS ----------
   if (url === "/api/products" && method === "GET") {
-    return sendJSON(res, 200, db.getProducts());
+    return sendJSON(res, 200, await db.getProducts());
   }
 
   if (url.match(/^\/api\/products\/[\w-]+$/) && method === "GET") {
     const id = url.split("/").pop();
-    const product = db.getProducts().find((p) => p.id === id);
+    const product = (await db.getProducts()).find((p) => p.id === id);
     if (!product) return sendJSON(res, 404, { error: "Product not found" });
     return sendJSON(res, 200, product);
   }
@@ -197,7 +197,7 @@ const server = http.createServer(async (req, res) => {
       if (!body.name || body.price == null) {
         return sendJSON(res, 400, { error: "name and price are required" });
       }
-      const products = db.getProducts();
+      const products = await db.getProducts();
       const newProduct = {
         id: "p" + crypto.randomBytes(4).toString("hex"),
         name: body.name,
@@ -217,7 +217,7 @@ const server = http.createServer(async (req, res) => {
         featured: !!body.featured,
       };
       products.push(newProduct);
-      db.saveProducts(products);
+      await db.saveProducts(products);
       return sendJSON(res, 201, newProduct);
     } catch (e) {
       return sendJSON(res, 400, { error: "Invalid JSON body" });
@@ -228,11 +228,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const id = url.split("/").pop();
       const body = await readBody(req);
-      const products = db.getProducts();
+      const products = await db.getProducts();
       const idx = products.findIndex((p) => p.id === id);
       if (idx === -1) return sendJSON(res, 404, { error: "Product not found" });
       products[idx] = { ...products[idx], ...body, id };
-      db.saveProducts(products);
+      await db.saveProducts(products);
       return sendJSON(res, 200, products[idx]);
     } catch (e) {
       return sendJSON(res, 400, { error: "Invalid JSON body" });
@@ -241,19 +241,19 @@ const server = http.createServer(async (req, res) => {
 
   if (url.match(/^\/api\/products\/[\w-]+$/) && method === "DELETE") {
     const id = url.split("/").pop();
-    const products = db.getProducts();
+    const products = await db.getProducts();
     const filtered = products.filter((p) => p.id !== id);
     if (filtered.length === products.length) {
       return sendJSON(res, 404, { error: "Product not found" });
     }
-    db.saveProducts(filtered);
+    await db.saveProducts(filtered);
     return sendJSON(res, 200, { success: true });
   }
 
   // ---------- API: ORDERS ----------
   if (url === "/api/orders" && method === "GET") {
     const userId = query.get("userId");
-    const all = db.getOrders();
+    const all = await db.getOrders();
     const filtered = userId ? all.filter((o) => o.userId === userId) : all;
     return sendJSON(res, 200, filtered);
   }
@@ -264,7 +264,7 @@ const server = http.createServer(async (req, res) => {
       if (!body.items || !body.items.length || !body.customer) {
         return sendJSON(res, 400, { error: "items and customer are required" });
       }
-      const orders = db.getOrders();
+      const orders = await db.getOrders();
       const newOrder = {
         id: "ORD" + Date.now().toString().slice(-8),
         userId: body.userId || null,
@@ -275,15 +275,15 @@ const server = http.createServer(async (req, res) => {
         createdAt: new Date().toISOString(),
       };
       orders.push(newOrder);
-      db.saveOrders(orders);
+      await db.saveOrders(orders);
 
       // Decrease stock for ordered items
-      const products = db.getProducts();
+      const products = await db.getProducts();
       newOrder.items.forEach((it) => {
         const p = products.find((pr) => pr.id === it.productId);
         if (p) p.stock = Math.max(0, p.stock - it.qty);
       });
-      db.saveProducts(products);
+      await db.saveProducts(products);
 
       return sendJSON(res, 201, newOrder);
     } catch (e) {
@@ -295,11 +295,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const id = url.split("/").pop();
       const body = await readBody(req);
-      const orders = db.getOrders();
+      const orders = await db.getOrders();
       const idx = orders.findIndex((o) => o.id === id);
       if (idx === -1) return sendJSON(res, 404, { error: "Order not found" });
       orders[idx] = { ...orders[idx], ...body, id };
-      db.saveOrders(orders);
+      await db.saveOrders(orders);
       return sendJSON(res, 200, orders[idx]);
     } catch (e) {
       return sendJSON(res, 400, { error: "Invalid JSON body" });
@@ -317,4 +317,9 @@ server.listen(PORT, () => {
   console.log(`\nVezora E-Commerce server running:`);
   console.log(`  Store:  http://localhost:${PORT}`);
   console.log(`  Admin:  http://localhost:${PORT}/admin/admin.html\n`);
+  if (process.env.MONGODB_URI) {
+    console.log("MONGODB_URI detected — will connect to MongoDB for persistent storage.");
+  } else {
+    console.log("No MONGODB_URI found — using local db.json file (NOT persistent on free hosting restarts).");
+  }
 });
