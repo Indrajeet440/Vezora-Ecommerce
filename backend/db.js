@@ -11,6 +11,13 @@
  *
  * Every function returns a Promise either way, so callers always
  * use `await db.xxx()`.
+ *
+ * MongoDB storage design: each collection (products, orders, users,
+ * settings) is stored as ONE document {key, value} in a single
+ * "Store" collection, where `value` holds the entire array/object.
+ * This is deliberately simple (one fast read/write per call, no
+ * bulk per-item operations) so it stays reliable on a free-tier
+ * MongoDB cluster.
  * ------------------------------------------------------------------
  */
 const fs = require("fs");
@@ -33,70 +40,77 @@ function initMongo() {
     .then(() => console.log("Connected to MongoDB — data will persist across restarts."))
     .catch((err) => {
       console.error("MongoDB connection failed, check MONGODB_URI:", err.message);
+      mongoReady = null; // allow a retry on the next call instead of staying broken forever
       throw err;
     });
 
-  const Product = mongoose.models.Product || mongoose.model("Product", new mongoose.Schema({}, { strict: false }));
-  const Order = mongoose.models.Order || mongoose.model("Order", new mongoose.Schema({}, { strict: false }));
-  const User = mongoose.models.User || mongoose.model("User", new mongoose.Schema({}, { strict: false }));
-  const Setting = mongoose.models.Setting || mongoose.model("Setting", new mongoose.Schema({}, { strict: false }));
+  const Store =
+    mongoose.models.Store ||
+    mongoose.model("Store", new mongoose.Schema({ key: String, value: mongoose.Schema.Types.Mixed }, { strict: false }));
 
-  mongoReady = connected.then(() => ({ Product, Order, User, Setting }));
+  mongoReady = connected.then(() => ({ Store }));
   return mongoReady;
+}
+
+async function getValue(key, fallback) {
+  const { Store } = await initMongo();
+  const doc = await Store.findOne({ key }).lean();
+  return doc ? doc.value : fallback;
+}
+
+async function setValue(key, value) {
+  const { Store } = await initMongo();
+  await Store.findOneAndUpdate({ key }, { key, value }, { upsert: true });
 }
 
 // Seed MongoDB from the bundled db.json the FIRST time it's empty
 // (so the live site starts with the same 164 products, banners, etc.
 // instead of an empty database).
-async function seedIfEmpty(models) {
-  const count = await models.Product.countDocuments();
-  if (count > 0) return;
+let seedChecked = false;
+
+async function seedIfEmpty() {
+  if (seedChecked) return;
+  seedChecked = true;
+  const { Store } = await initMongo();
+  const existing = await Store.findOne({ key: "products" }).lean();
+  if (existing) return;
+
   const seed = JSON.parse(fs.readFileSync(DB_PATH, "utf-8"));
-  if (seed.products?.length) await models.Product.insertMany(seed.products);
-  if (seed.orders?.length) await models.Order.insertMany(seed.orders);
-  if (seed.users?.length) await models.User.insertMany(seed.users);
-  if (seed.settings) await models.Setting.create({ key: "site", value: seed.settings });
+  await Store.findOneAndUpdate({ key: "products" }, { key: "products", value: seed.products || [] }, { upsert: true });
+  await Store.findOneAndUpdate({ key: "orders" }, { key: "orders", value: seed.orders || [] }, { upsert: true });
+  await Store.findOneAndUpdate({ key: "users" }, { key: "users", value: seed.users || [] }, { upsert: true });
+  await Store.findOneAndUpdate({ key: "settings" }, { key: "settings", value: seed.settings || {} }, { upsert: true });
   console.log("Seeded MongoDB with initial products/orders/users/settings from db.json.");
 }
 
 const mongoDb = {
   async getProducts() {
-    const m = await initMongo();
-    await seedIfEmpty(m);
-    return m.Product.find({}, { _id: 0, __v: 0 }).lean();
+    await seedIfEmpty();
+    return (await getValue("products", [])) || [];
   },
   async saveProducts(products) {
-    const m = await initMongo();
-    await m.Product.deleteMany({});
-    if (products.length) await m.Product.insertMany(products);
+    await setValue("products", products);
   },
   async getOrders() {
-    const m = await initMongo();
-    return m.Order.find({}, { _id: 0, __v: 0 }).lean();
+    await seedIfEmpty();
+    return (await getValue("orders", [])) || [];
   },
   async saveOrders(orders) {
-    const m = await initMongo();
-    await m.Order.deleteMany({});
-    if (orders.length) await m.Order.insertMany(orders);
+    await setValue("orders", orders);
   },
   async getUsers() {
-    const m = await initMongo();
-    return m.User.find({}, { _id: 0, __v: 0 }).lean();
+    await seedIfEmpty();
+    return (await getValue("users", [])) || [];
   },
   async saveUsers(users) {
-    const m = await initMongo();
-    await m.User.deleteMany({});
-    if (users.length) await m.User.insertMany(users);
+    await setValue("users", users);
   },
   async getSettings() {
-    const m = await initMongo();
-    await seedIfEmpty(m);
-    const doc = await m.Setting.findOne({ key: "site" }).lean();
-    return doc?.value || {};
+    await seedIfEmpty();
+    return (await getValue("settings", {})) || {};
   },
   async saveSettings(settings) {
-    const m = await initMongo();
-    await m.Setting.findOneAndUpdate({ key: "site" }, { key: "site", value: settings }, { upsert: true });
+    await setValue("settings", settings);
   },
 };
 
